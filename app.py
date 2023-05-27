@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 import psycopg2
 from flask_cors import CORS
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 # PostgreSQL database configuration
 conn = psycopg2.connect(
