@@ -19,10 +19,12 @@ def register():
         data = request.get_json()
         if data is None:
             return jsonify({'error': 'Invalid JSON payload'}), 400
-
-        username = data.get('username')
-        password = data.get('password')
-        role = data.get('role')
+        try: 
+            username = data['username']
+            password = data['password']
+            role = data['role']
+        except Exception as e:
+            return jsonify({'error': 'Invalid JSON payload'}), 400
 
         if not (username and password and role):
             return jsonify({'error': 'Missing required fields'}), 400
