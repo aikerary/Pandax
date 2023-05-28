@@ -13,7 +13,6 @@ conn = psycopg2.connect(
     password='87juV5ghHEfCQxcHSUddSMx6fmjTdrDi'
 )
 
-# User registration
 @app.route('/register', methods=['POST'])
 def register():
     try:
@@ -21,29 +20,48 @@ def register():
         username = data['username']
         password = data['password']
         role = data['role']
+        error = None
+
         # Check if the username already exists
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
-        row = cursor.fetchone()
-        if row is not None:
+        try:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
+            row = cursor.fetchone()
             cursor.close()
-            return jsonify({'error': 'Username already exists'}), 409
+
+            if row is not None:
+                error = 'Username already exists'
+        except Exception as e:
+            error = 'Error checking username: {}'.format(e)
+
+        if error is not None:
+            return jsonify({'error': error}), 409
+
         # Create a new user
-        cursor.execute('INSERT INTO users (username, password, role) VALUES (%s, %s, %s) RETURNING *',
-                       (username, password, role))
-        row = cursor.fetchone()
-        cursor.close()
-        user = {
-            'userid': row[0],
-            'username': row[1],
-            'password': row[2],
-            'role': row[3],
-            'created_at': row[4]
-        }
-        return jsonify(user), 201
+        try:
+            cursor = conn.cursor()
+            cursor.execute('INSERT INTO users (username, password, role) VALUES (%s, %s, %s) RETURNING *',
+                           (username, password, role))
+            row = cursor.fetchone()
+            cursor.close()
+
+            user = {
+                'userid': row[0],
+                'username': row[1],
+                'password': row[2],
+                'role': row[3],
+                'created_at': row[4]
+            }
+            return jsonify(user), 201
+        except Exception as e:
+            error = 'Error creating new user: {}'.format(e)
+        
+        if error is not None:
+            return jsonify({'error': error}), 500
+
     except Exception as e:
-        print('Database error:', e)
-        return jsonify({'error': 'Internal server error'}), 500
+        error = 'Error processing registration: {}'.format(e)
+        return jsonify({'error': error}), 500
 
 # User login
 @app.route('/login', methods=['POST'])
