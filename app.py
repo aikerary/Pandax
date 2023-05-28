@@ -115,7 +115,7 @@ def weight():
         
         cursor = conn.cursor()
         try:
-            cursor.execute('INSERT INTO weight (user_id, weight, Date_of_Measure) VALUES (%s, %s, %s)',
+            cursor.execute('INSERT INTO weight (user_id, weight, dom) VALUES (%s, %s, %s)',
                        (user_id, weight, date_of_measure))
         except Exception as e:
             print('Error inserting weight data:', e)
