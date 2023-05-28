@@ -117,6 +117,7 @@ def add_weight():
         return jsonify({'message': 'Weight data inserted successfully'}), 201
     except Exception as e:
         print('Error inserting weight data:', e)
+        print('SQL Query:', 'INSERT INTO weight (user_id, weight, date_of_measure) VALUES (%s, %s, %s)' % (user_id, weight, date_of_measure))
         return jsonify({'error': 'Internal server error'}), 500
 
 # ... Existing routes and functions ...
