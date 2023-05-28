@@ -100,7 +100,7 @@ def login():
         return jsonify({'error': 'Internal server error'}), 500
     
 @app.route('/weight', methods=['POST'])
-def add_weight():
+def weight():
     try:
         data= request.get_json()
         user_id = data['user_id']
@@ -114,8 +114,12 @@ def add_weight():
         date_of_measure = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
         
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO weight (user_id, weight, Date_of_Measure) VALUES (%s, %s, %s)',
+        try:
+            cursor.execute('INSERT INTO weight (user_id, weight, Date_of_Measure) VALUES (%s, %s, %s)',
                        (user_id, weight, date_of_measure))
+        except Exception as e:
+            print('Error inserting weight data:', e)
+            return jsonify({'error': 'Hey bruto, mira el problema está en el query'}), 500
         cursor.close()
         conn.commit()
 
