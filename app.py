@@ -91,7 +91,6 @@ def login():
             'username': row[1],
             'password': row[2],
             'role': row[3],
-            'created_at': row[4]
         }
         return jsonify(user)
     except Exception as e:
