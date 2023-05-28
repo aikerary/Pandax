@@ -53,6 +53,7 @@ def register():
                            (username, password, role))
             row = cursor.fetchone()
             cursor.close()
+            conn.commit()
 
             user = {
                 'userid': row[0],
