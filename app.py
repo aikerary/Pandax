@@ -101,7 +101,7 @@ def login():
     
 @app.route('/weight', methods=['POST'])
 def weight():
-    try:
+    # try:
         data= request.get_json()
         user_id = data['user_id']
         weight = data['weight']
@@ -124,9 +124,9 @@ def weight():
         conn.commit()
 
         return jsonify({'message': 'Weight data inserted successfully'}), 201
-    except Exception as e:
-        print('Error inserting weight data:', e)
-        return jsonify({'error': 'Internal server error'}), 500
+    # except Exception as e:
+    #     print('Error inserting weight data:', e)
+    #     return jsonify({'error': 'Internal server error'}), 500
 
 # ... Existing routes and functions ...
 
