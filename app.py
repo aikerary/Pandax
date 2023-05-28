@@ -105,6 +105,11 @@ def add_weight():
         data= request.get_json()
         user_id = data['user_id']
         weight = data['weight']
+        try :
+            user_id = int(user_id)
+            weight = float(weight)
+        except Exception as e:
+            return jsonify({'error': 'Invalid JSON payload'}), 400
         current_datetime = datetime.now()
         date_of_measure = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
         
@@ -117,7 +122,6 @@ def add_weight():
         return jsonify({'message': 'Weight data inserted successfully'}), 201
     except Exception as e:
         print('Error inserting weight data:', e)
-        print('SQL Query:', 'INSERT INTO weight (user_id, weight, date_of_measure) VALUES (%s, %s, %s)' % (user_id, weight, date_of_measure))
         return jsonify({'error': 'Internal server error'}), 500
 
 # ... Existing routes and functions ...
