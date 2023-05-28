@@ -1,8 +1,9 @@
 from flask import Flask, jsonify, request
-import psycopg2
 from flask_cors import CORS
+import psycopg2
+
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+CORS(app)
 
 # PostgreSQL database configuration
 conn = psycopg2.connect(
@@ -12,38 +13,22 @@ conn = psycopg2.connect(
     password='87juV5ghHEfCQxcHSUddSMx6fmjTdrDi'
 )
 
-# Retrieve all users
-@app.route('/users', methods=['GET'])
-def get_users():
-    try:
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM users')
-        rows = cursor.fetchall()
-        cursor.close()
-        users = []
-        for row in rows:
-            user = {
-                'userid': row[0],
-                'username': row[1],
-                'password': row[2],
-                'role': row[3],
-                'created_at': row[4]
-            }
-            users.append(user)
-        return jsonify(users)
-    except Exception as e:
-        print('Database error:', e)
-        return jsonify({'error': 'Internal server error'}), 500
-
-# Create a new user
-@app.route('/users', methods=['POST'])
-def create_user():
+# User registration
+@app.route('/register', methods=['POST'])
+def register():
     try:
         data = request.get_json()
         username = data['username']
         password = data['password']
         role = data['role']
+        # Check if the username already exists
         cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
+        row = cursor.fetchone()
+        if row is not None:
+            cursor.close()
+            return jsonify({'error': 'Username already exists'}), 409
+        # Create a new user
         cursor.execute('INSERT INTO users (username, password, role) VALUES (%s, %s, %s) RETURNING *',
                        (username, password, role))
         row = cursor.fetchone()
@@ -60,43 +45,20 @@ def create_user():
         print('Database error:', e)
         return jsonify({'error': 'Internal server error'}), 500
 
-# Retrieve a specific user by ID
-@app.route('/users/<int:user_id>', methods=['GET'])
-def get_user(user_id):
-    try:
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM users WHERE userid = %s', (user_id,))
-        row = cursor.fetchone()
-        cursor.close()
-        if row is None:
-            return jsonify({'error': 'User not found'}), 404
-        user = {
-            'userid': row[0],
-            'username': row[1],
-            'password': row[2],
-            'role': row[3],
-            'created_at': row[4]
-        }
-        return jsonify(user)
-    except Exception as e:
-        print('Database error:', e)
-        return jsonify({'error': 'Internal server error'}), 500
-
-# Update a user
-@app.route('/users/<int:user_id>', methods=['PUT'])
-def update_user(user_id):
+# User login
+@app.route('/login', methods=['POST'])
+def login():
     try:
         data = request.get_json()
         username = data['username']
         password = data['password']
-        role = data['role']
+        # Check if the username and password match
         cursor = conn.cursor()
-        cursor.execute('UPDATE users SET username = %s, password = %s, role = %s WHERE userid = %s RETURNING *',
-                       (username, password, role, user_id))
+        cursor.execute('SELECT * FROM users WHERE username = %s AND password = %s', (username, password))
         row = cursor.fetchone()
         cursor.close()
         if row is None:
-            return jsonify({'error': 'User not found'}), 404
+            return jsonify({'error': 'Invalid username or password'}), 401
         user = {
             'userid': row[0],
             'username': row[1],
@@ -109,20 +71,7 @@ def update_user(user_id):
         print('Database error:', e)
         return jsonify({'error': 'Internal server error'}), 500
 
-# Delete a user
-@app.route('/users/<int:user_id>', methods=['DELETE'])
-def delete_user(user_id):
-    try:
-        cursor = conn.cursor()
-        cursor.execute('DELETE FROM users WHERE userid = %s RETURNING *', (user_id,))
-        row = cursor.fetchone()
-        cursor.close()
-        if row is None:
-            return jsonify({'error': 'User not found'}), 404
-        return '', 204
-    except Exception as e:
-        print('Database error:', e)
-        return jsonify({'error': 'Internal server error'}), 500
+# ... Existing routes and functions ...
 
-if __name__ == '__main__':
+if __name__ == '_main_':
     app.run(debug=True)
