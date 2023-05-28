@@ -98,27 +98,6 @@ def login():
     except Exception as e:
         print('Database error:', e)
         return jsonify({'error': 'Internal server error'}), 500
-    
-
-@app.route('/weight', methods=['POST'])
-def add_weight():
-    try:
-        data= request.get_json()
-        user_id = data['user_id']
-        weight = data['weight']
-        current_datetime = datetime.now() 
-        date_of_measure = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-        
-        cursor = conn.cursor()
-        cursor.execute('INSERT INTO weight (user_id, weight, date_of_measure) VALUES (%s, %s, %s)',
-                       (user_id, weight, date_of_measure))
-        cursor.close()
-        conn.commit()
-
-        return jsonify({'message': 'Weight data inserted successfully'}), 201
-    except Exception as e:
-        print('Error inserting weight data:', e)
-        return jsonify({'error': 'Internal server error'}), 500
 
 # ... Existing routes and functions ...
 
