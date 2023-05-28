@@ -17,9 +17,16 @@ conn = psycopg2.connect(
 def register():
     try:
         data = request.get_json()
-        username = data['username']
-        password = data['password']
-        role = data['role']
+        if data is None:
+            return jsonify({'error': 'Invalid JSON payload'}), 400
+
+        username = data.get('username')
+        password = data.get('password')
+        role = data.get('role')
+
+        if not (username and password and role):
+            return jsonify({'error': 'Missing required fields'}), 400
+
         error = None
 
         # Check if the username already exists
@@ -62,6 +69,7 @@ def register():
     except Exception as e:
         error = 'Error processing registration: {}'.format(e)
         return jsonify({'error': error}), 500
+
 
 # User login
 @app.route('/login', methods=['POST'])
