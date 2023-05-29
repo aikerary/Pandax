@@ -120,6 +120,29 @@ def add_weight():
     except Exception as e:
         print('Error inserting weight data:', e)
         return jsonify({'error': 'Internal server error'}), 500
+    
+@app.route('/weight/<int:user_id>', methods=['GET'])
+def get_weight(user_id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('SELECT weight, dom FROM weight WHERE user_id = %s', (user_id,))
+        rows = cursor.fetchall()
+        cursor.close()
+
+        if not rows:
+            return jsonify({'message': 'No weight data found for the user'}), 404
+
+        weight_data = []
+        for row in rows:
+            weight_data.append({
+                'weight': row[0],
+                'date_of_measure': row[1].strftime('%Y-%m-%d %H:%M:%S')
+            })
+
+        return jsonify(weight_data)
+    except Exception as e:
+        print('Error retrieving weight data:', e)
+        return jsonify({'error': 'Internal server error'}), 500
 
 # ... Existing routes and functions ...
 
